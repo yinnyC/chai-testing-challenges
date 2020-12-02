@@ -11,7 +11,7 @@ Submit your code using [Gradescope](https://gradescope.com).
 #### Messages (TODOs)
 
 | Route | Method | Description |
-| ----------- | ----------- | ----------- | ----------- |
+| ----------- | ----------- | ----------- |
 |http://localhost:3000/messages |GET | Gets all messagess |
 |http://localhost:3000/messages/{messageId} |GET | Get one message by id|
 |http://localhost:3000/messages | POST | add a new message |
@@ -22,7 +22,7 @@ Submit your code using [Gradescope](https://gradescope.com).
 #### Users
 
 | Route | Method  | Description |
-| ----------- | ----------- | ----------- | ----------- |
+| ----------- | ----------- | ----------- |
 |http://localhost:3000/users/ | GET | get all users |
 |http://localhost:3000/users/{userId} |GET | Get one user by id|
 |http://localhost:3000/users | POST | add a new user to the database |
