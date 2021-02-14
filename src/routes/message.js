@@ -7,7 +7,8 @@ const Message = require('../models/message')
 /** Route to get all messages. */
 router.get('/', (req, res) => {
     // Get all Message objects using `.find()`
-    Message.find().then((message)=>{
+    Message.find()
+    .then((message)=>{
         // Return the Message objects as a JSON list
         return res.json({message})
     }).catch((err)=>{
@@ -34,7 +35,7 @@ router.post('/', (req, res) => {
         return User.findById(message.author)
     })
     .then(user => {
-        console.log(user.messages)
+        // console.log(user.messages)
         user.messages.unshift(message)
         return user.save()
     })
@@ -63,32 +64,22 @@ router.put('/:messageId', (req, res) => {
 
 /** Route to delete a message. */
 router.delete('/:messageId', (req, res) => {
+    // Delete the specified Message using `findByIdAndDelete`. Make sure
+    // to also delete the message from the User object's `messages` array
     Message.findByIdAndDelete(req.params.messageId)
-    .then(result=>{
-        if(result===null){
-            return res.json({ message: 'Message does not exist.' })
-        }
-        return res.json({
-            message: 'Message deleted.',
-            _id: req.params.messageId
-        }).catch(err => {
-            throw err.message
-          })
+    .then((deletedMessage)=>{
+        return User.findById(deletedMessage.author)
     })
-})
-router.delete('/:messageId', (req, res) => {
-    Message.findByIdAndDelete(req.params.messageId)
-    .then(result=>{
-        console.log(result)
-        if(result===null){
-            return res.json({ message: 'Message does not exist.' })
-        }
-        return res.json({
-            message: 'Message deleted.',
-            _id: req.params.messageId
-        }).catch(err => {
-            throw err.message
+    .then((user)=>{
+        return user.messages.filter(message => {
+            return message._id.toString() != req.params.messageId.toString()
           })
+    }) 
+    .then(result => {
+        return res.json({ msg: "Message has been deleted." })
+      })
+    .catch((err) => {
+        throw err.message
     })
 })
 module.exports = router
