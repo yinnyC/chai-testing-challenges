@@ -2,7 +2,8 @@ const express = require('express')
 const router = express.Router();
 
 const User = require('../models/user')
-const Message = require('../models/message')
+const Message = require('../models/message');
+const { addListener } = require('../config/db-setup');
 
 /** Route to get all messages. */
 router.get('/', (req, res) => {
@@ -48,14 +49,12 @@ router.post('/', (req, res) => {
 
 /** Route to update an existing message. */
 router.put('/:messageId', (req, res) => {
-    
-    Message.findByIdAndUpdate(
-      req.params.messageId, req.body
-    ).then(
-        Message.findById(req.params.messageId)
-    ).then(
-      (message) => {
-        return res.json({ message })
+    Message.findByIdAndUpdate(req.params.messageId,req.body)
+    .then(()=>{
+        return Message.findOne({_id: req.params.messageId}) 
+    }).then(
+      (message) =>{
+        res.json({ message }) 
       }
     ).catch(err => {
       throw err.message
@@ -71,12 +70,14 @@ router.delete('/:messageId', (req, res) => {
         return User.findById(deletedMessage.author)
     })
     .then((user)=>{
-        return user.messages.filter(message => {
+        user.messages = user.messages.filter(message => {
             return message._id.toString() != req.params.messageId.toString()
-          })
+          }) // The reference of the array changes
+        user.markModified('messages') // marking this key pair is updating 
+        return user.save()
     }) 
     .then(result => {
-        return res.json({ msg: "Message has been deleted." })
+        return res.json({ msg: "Successfully deleted." })
       })
     .catch((err) => {
         throw err.message

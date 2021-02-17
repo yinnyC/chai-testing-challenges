@@ -26,15 +26,15 @@ after((done) => {
 })
 
 
-const SAMPLE_OBJECT_ID = '313131313131313131313131' // 12 byte string
-const SAMPLE_OBJECT_ID_2 = '323232323232323232323232' // 12 byte string
+const SAMPLE_OBJECT_ID = 'aaaaaaaaaaaa' // 12 byte string
+let SAMPLE_OBJECT_ID_2 = 'daaaaaaaaaaa' // 12 byte string
 
 describe('Message API endpoints', () => {
     beforeEach((done) => {
         const sampleUser = new User({
             username: 'myuser',
             password: 'mypassword',
-            _id: SAMPLE_OBJECT_ID
+            _id:SAMPLE_OBJECT_ID
         })
         const sampleMessage = new Message({
             title:'mytitle',
@@ -52,12 +52,24 @@ describe('Message API endpoints', () => {
 
     afterEach((done) => {
         User.deleteMany({ username: ['myuser'] }).then(() => {
-            Message.deleteMany({ title: "Test Message" })
+            Message.deleteMany({ title: "mytitle" })
             .then(() => {
                 done()
             })
         })
     })
+
+    it('should update a message', (done) => {
+        chai.request(app)
+        .put(`/messages/${SAMPLE_OBJECT_ID_2}`)
+        .send({body:'UpdatemyBody'})
+        .end((err,res)=>{
+            if (err) { done(err) }
+            expect(res.body.message).to.have.property('body', 'UpdatemyBody')
+            expect(res.body.message).to.be.an('object')
+            done()
+            })
+        })
 
     it('should load all messages', (done) => {
         chai.request(app)
@@ -77,9 +89,8 @@ describe('Message API endpoints', () => {
             if(err) {done(err)}
             expect(res).to.have.status(200)
             expect(res.body).to.be.an("object")
-            // expect(res.body.title).to.equal('mytitle')
-            // expect(res.body.body).to.equal('mybody')
-            // expect(res.body.author).to.equal(SAMPLE_OBJECT_ID)
+            expect(res.body.message.title).to.equal('mytitle')
+            expect(res.body.message.body).to.equal('mybody')
             done()
         })
     })
@@ -89,37 +100,27 @@ describe('Message API endpoints', () => {
         .post('/messages')
         .send({
             title:'mytitle',
-            body: 'mybody',
+            body: 'another_mybody',
             author: SAMPLE_OBJECT_ID,
         }).end((err,res)=>{
             if (err) { done(err) }
             expect(res).to.have.status(200)
+            expect(res.body).to.have.property('title', 'mytitle')
+            expect(res.body).to.have.property('body', 'another_mybody')
             done()
         })
     })
-
-    it('should update a message', (done) => {
-        chai.request(app)
-        .put(`/messages/${SAMPLE_OBJECT_ID_2}`)
-        .send({
-            title:'Update mytitle',
-            body: 'Update mybody',
-            author: SAMPLE_OBJECT_ID,
-        })
-        .end((err,res)=>{
-            if (err) { done(err) }
-            expect(res).to.have.status(200)
-            done()
-        })
-    })
-
     it('should delete a message', (done) => {
         chai.request(app)
         .delete(`/messages/${SAMPLE_OBJECT_ID_2}`)
         .end((err,res)=>{
             if (err) { done(err) }
             expect(res).to.have.status(200)
+            expect(res.body.msg).to.equal('Successfully deleted.')
             done()
         })
     })
-})
+    })
+
+    
+
